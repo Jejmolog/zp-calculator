@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>первый Бит — Калькулятор ЗП · Прохорова А.М.</title>
+<style>
+  :root {
+    --pink: #E50071; --pink-dark: #BD0069; --pink-light: #fce8f2;
+    --black: #000; --gray-light: #f4f4f4; --gray-mid: #e0e0e0;
+    --gray-text: #555; --white: #fff;
+    --font: Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--white); color: var(--black); -webkit-font-smoothing: antialiased; }
+
+  .header { border-bottom: 1px solid var(--gray-mid); padding: 16px 36px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.03em; }
+  .logo span { color: var(--pink); }
+  .header-meta { font-size: 11px; color: var(--gray-text); text-align: right; line-height: 1.5; }
+
+  .hero { background: var(--black); color: var(--white); padding: 24px 36px; }
+  .hero-eyebrow { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pink); margin-bottom: 5px; }
+  .hero h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  .hero-name { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+  .period-bar { background: var(--gray-light); padding: 12px 36px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--gray-mid); flex-wrap: wrap; }
+  .period-bar label { font-size: 13px; font-weight: 700; }
+  select { font-family: var(--font); font-size: 13px; font-weight: 700; padding: 7px 28px 7px 10px; border: 2px solid var(--black); background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23000'/%3E%3C/svg%3E") no-repeat right 8px center; -webkit-appearance: none; appearance: none; cursor: pointer; }
+  select:focus { outline: 2px solid var(--pink); }
+  button#resetBtn { margin-left: auto; font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gray-text); background: none; border: 1px solid var(--gray-mid); padding: 7px 12px; cursor: pointer; }
+  button#resetBtn:hover { color: var(--black); border-color: var(--black); }
+
+  .layout { display: grid; grid-template-columns: 1.4fr 1fr; min-height: calc(100vh - 160px); }
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+
+  .inputs-col { padding: 28px 36px; border-right: 1px solid var(--gray-mid); }
+
+  .section { margin-bottom: 28px; }
+  .section-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--black); }
+  .section-title { font-size: 14px; font-weight: 700; }
+  .section-note { font-size: 11px; color: var(--gray-text); }
+
+  .field { margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 5px; }
+  .input-wrap { display: flex; align-items: stretch; border: 2px solid var(--black); }
+  .input-wrap:focus-within { border-color: var(--pink); }
+  .input-prefix { padding: 0 10px; background: var(--black); color: var(--white); font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+  .input-wrap input[type=number] { flex: 1; border: none; outline: none; padding: 9px 10px; font-family: var(--font); font-size: 15px; font-weight: 700; color: var(--black); background: var(--white); width: 100%; }
+  .input-hint { font-size: 11px; color: var(--gray-text); margin-top: 4px; }
+  .input-hint strong { color: var(--black); font-weight: 700; }
+  .days-row { display: flex; gap: 10px; }
+  .days-row .field { flex: 1; }
+
+  .kpi-table { width: 100%; border-collapse: collapse; }
+  .kpi-table tr { border-bottom: 1px solid var(--gray-mid); }
+  .kpi-table tr:last-child { border-bottom: none; }
+  .kpi-table td { padding: 9px 0; vertical-align: middle; }
+  .kpi-name { font-size: 13px; font-weight: 700; display: block; }
+  .kpi-target { font-size: 11px; color: var(--gray-text); }
+  .kpi-input input { width: 80px; font-family: var(--font); font-size: 14px; font-weight: 700; padding: 7px 6px; border: 2px solid var(--black); text-align: center; outline: none; background: var(--white); }
+  .kpi-input input:focus { border-color: var(--pink); }
+  .kpi-status { font-size: 11px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; text-align: right; padding-left: 8px; white-space: nowrap; }
+  .kpi-status.pending { color: var(--gray-text); }
+  .kpi-status.done { color: var(--pink); }
+
+  .receipt-col { padding: 28px 32px; background: var(--white); position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+  @media (max-width: 780px) { .receipt-col { position: static; max-height: none; } }
+
+  .receipt-eyebrow { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 3px; }
+  .receipt-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
+  .receipt-period { font-size: 11px; color: var(--gray-text); margin-bottom: 18px; }
+
+  .r-line { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--gray-mid); gap: 8px; }
+  .r-line .r-label { font-size: 12px; font-weight: 700; }
+  .r-line .r-sub { font-size: 10px; color: var(--gray-text); }
+  .r-line .r-val { font-size: 13px; font-weight: 700; white-space: nowrap; text-align: right; }
+  .r-line .r-val.positive { color: var(--pink); }
+  .r-line.subtotal { border-bottom: none; border-top: 2px solid var(--black); margin-top: 4px; padding-top: 10px; }
+
+  .total-block { background: var(--pink); padding: 18px 20px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .total-label { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--white); }
+  .total-amount { font-size: 26px; font-weight: 900; color: var(--white); letter-spacing: -0.02em; }
+
+  .receipt-footnote { font-size: 10px; color: var(--gray-text); margin-top: 12px; line-height: 1.5; border-top: 1px solid var(--gray-mid); padding-top: 10px; }
+
+  .signature-block { margin-top: 16px; border: 2px solid var(--black); padding: 12px 14px; }
+  .signature-label { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 6px; }
+  .signature-name { font-size: 14px; font-weight: 700; }
+  .signature-role { font-size: 11px; color: var(--gray-text); margin-top: 2px; }
+  .signature-date { font-size: 11px; color: var(--gray-text); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-mid); }
+
+  .schedule-block { margin-top: 14px; border: 2px solid var(--black); padding: 12px 14px; }
+  .schedule-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .schedule-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 5px; font-size: 11px; }
+  .schedule-row:last-child { margin-bottom: 0; }
+  .schedule-date { font-size: 13px; font-weight: 900; color: var(--pink); min-width: 24px; }
+  .schedule-desc { color: var(--gray-text); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">первый<span>.</span>Бит</div>
+  <div class="header-meta">Калькулятор ЗП · МАП<br>Схема: 01.06.2026 — 01.09.2026</div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Группа автоматизации КЭДО · Продажи</div>
+  <h1>Менеджер активных продаж</h1>
+  <div class="hero-name">Прохорова Анна Михайловна</div>
+</div>
+
+<div class="period-bar">
+  <label for="periodSelect">Месяц расчёта:</label>
+  <select id="periodSelect">
+    <option value="june">Июнь 2026</option>
+    <option value="july">Июль 2026</option>
+    <option value="august">Август 2026</option>
+  </select>
+  <button id="resetBtn" type="button">Сбросить</button>
+</div>
+
+<div class="layout">
+  <div class="inputs-col">
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Оклад</span>
+        <span class="section-note">70 000 ₽ за полный месяц</span>
+      </div>
+      <div class="days-row">
+        <div class="field">
+          <label>Рабочих дней по графику</label>
+          <div class="input-wrap"><input type="number" id="scheduledDays" min="1" step="1" value="20"></div>
+        </div>
+        <div class="field">
+          <label>Отработано дней</label>
+          <div class="input-wrap"><input type="number" id="workedDays" min="0" step="1" value="20"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">KPI</span>
+        <span class="section-note">+5 000 ₽ за каждый, макс. 20 000 ₽</span>
+      </div>
+      <table class="kpi-table">
+        <tr>
+          <td><span class="kpi-name">Наряды на услуги</span><span class="kpi-target">цель: ≥ 8 в месяц</span></td>
+          <td class="kpi-input"><input type="number" id="naryad" min="0" step="1" value="0"></td>
+          <td class="kpi-status pending" id="naryadStatus">—</td>
+        </tr>
+        <tr>
+          <td><span class="kpi-name">Демо-доступы</span><span class="kpi-target">цель: ≥ 5 в месяц</span></td>
+          <td class="kpi-input"><input type="number" id="demo" min="0" step="1" value="0"></td>
+          <td class="kpi-status pending" id="demoStatus">—</td>
+        </tr>
+        <tr>
+          <td><span class="kpi-name">Диалог по БИТ.АТС</span><span class="kpi-target">цель: ≥ 600 мин/мес</span></td>
+          <td class="kpi-input"><input type="number" id="minutes" min="0" step="1" value="0"></td>
+          <td class="kpi-status pending" id="minutesStatus">—</td>
+        </tr>
+        <tr>
+          <td><span class="kpi-name">Встречи с клиентами</span><span class="kpi-target">цель: ≥ 8 в месяц</span></td>
+          <td class="kpi-input"><input type="number" id="meetings" min="0" step="1" value="0"></td>
+          <td class="kpi-status pending" id="meetingsStatus">—</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">РТУ (реализация)</span>
+        <span class="section-note">1% от превышения плана</span>
+      </div>
+      <div class="field">
+        <label>Факт РТУ за месяц, без НДС</label>
+        <div class="input-wrap"><span class="input-prefix">₽</span><input type="number" id="rtuFact" min="0" step="1" value="0"></div>
+        <p class="input-hint">План на <span id="monthLabelRtu">июнь</span>: <strong id="planRtuDisplay">348 450 ₽</strong></p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Новые сервисы</span>
+        <span class="section-note">3% от превышения плана 200 000 ₽</span>
+      </div>
+      <div class="field">
+        <label>Факт продаж новым клиентам, без НДС</label>
+        <div class="input-wrap"><span class="input-prefix">₽</span><input type="number" id="nsFact" min="0" step="1" value="0"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="receipt-col">
+    <div class="receipt-eyebrow">Расчётный листок</div>
+    <div class="receipt-title">Предварительный расчёт</div>
+    <div class="receipt-period" id="receiptPeriod">Июнь 2026</div>
+
+    <div class="receipt-lines">
+      <div class="r-line">
+        <div><div class="r-label">Оклад</div><div class="r-sub" id="lineOkladSub">20/20 дн.</div></div>
+        <div class="r-val" id="lineOklad">70 000 ₽</div>
+      </div>
+      <div class="r-line">
+        <div><div class="r-label">KPI</div><div class="r-sub" id="lineKpiSub">0/4 выполнено</div></div>
+        <div class="r-val positive" id="lineKpi">+0 ₽</div>
+      </div>
+      <div class="r-line">
+        <div><div class="r-label">РТУ (1% от превышения)</div></div>
+        <div class="r-val positive" id="lineRtu">+0 ₽</div>
+      </div>
+      <div class="r-line">
+        <div><div class="r-label">Новые сервисы (3%)</div></div>
+        <div class="r-val positive" id="lineNs">+0 ₽</div>
+      </div>
+      <div class="r-line subtotal">
+        <div><div class="r-label">Премия итого</div></div>
+        <div class="r-val" id="linePremium">0 ₽</div>
+      </div>
+    </div>
+
+    <div class="total-block">
+      <div class="total-label">Итого ЗП</div>
+      <div class="total-amount" id="lineTotal">70 000 ₽</div>
+    </div>
+
+    <p class="receipt-footnote">Суммы Gross — до вычета НДФЛ. Премия не является обязательной частью зарплаты.</p>
+
+    <div class="signature-block">
+      <div class="signature-label">Сотрудник</div>
+      <div class="signature-name">Прохорова Анна Михайловна</div>
+      <div class="signature-role">Менеджер активных продаж · Группа автоматизации КЭДО</div>
+      <div class="signature-date">Схема мотивации действует с 01.06.2026 по 01.09.2026</div>
+    </div>
+
+    <div class="schedule-block">
+      <div class="schedule-title">График выплат</div>
+      <div class="schedule-row"><span class="schedule-date">25</span><span class="schedule-desc">Аванс за первую половину месяца</span></div>
+      <div class="schedule-row"><span class="schedule-date">10</span><span class="schedule-desc">Зарплата за вторую половину предыдущего</span></div>
+      <div class="schedule-row"><span class="schedule-date">20</span><span class="schedule-desc">Премия за предыдущий период</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PLANS = {
+    june:   { label:'июнь',   periodLabel:'Июнь 2026',   rtu:348450 },
+    july:   { label:'июль',   periodLabel:'Июль 2026',   rtu:424120 },
+    august: { label:'август', periodLabel:'Август 2026', rtu:485280 }
+  };
+  const NS_PLAN=200000, OKLAD=70000, KPI_AMT=5000;
+  const DEFAULTS={scheduledDays:20,workedDays:20,naryad:0,demo:0,minutes:0,meetings:0,rtuFact:0,nsFact:0};
+
+  const num=id=>{const v=parseFloat(document.getElementById(id).value);return(isNaN(v)||v<0)?0:v;};
+  const fmt=n=>n.toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
+
+  function recalc(){
+    const p=PLANS[document.getElementById('periodSelect').value];
+    const sched=Math.max(num('scheduledDays'),1), worked=Math.min(num('workedDays'),sched);
+    const oklad=OKLAD*(worked/sched);
+
+    const kpis=[{id:'naryad',t:8,s:'naryadStatus'},{id:'demo',t:5,s:'demoStatus'},{id:'minutes',t:600,s:'minutesStatus'},{id:'meetings',t:8,s:'meetingsStatus'}];
+    let kpiCount=0;
+    kpis.forEach(k=>{
+      const done=num(k.id)>=k.t; if(done)kpiCount++;
+      const el=document.getElementById(k.s);
+      el.textContent=done?'✓ +5 000 ₽':'Не выполнено';
+      el.className='kpi-status '+(done?'done':'pending');
+    });
+    const kpiBonus=kpiCount*KPI_AMT;
+    const rtuBonus=Math.max(0,num('rtuFact')-p.rtu)*0.01;
+    const nsBonus=Math.max(0,num('nsFact')-NS_PLAN)*0.03;
+    const premium=kpiBonus+rtuBonus+nsBonus;
+    const total=oklad+premium;
+
+    document.getElementById('planRtuDisplay').textContent=fmt(p.rtu);
+    document.getElementById('monthLabelRtu').textContent=p.label;
+    document.getElementById('receiptPeriod').textContent=p.periodLabel;
+    document.getElementById('lineOklad').textContent=fmt(oklad);
+    document.getElementById('lineOkladSub').textContent=worked+'/'+sched+' дн.';
+
+    const setLine=(id,val)=>{const el=document.getElementById(id);el.textContent=(val>0?'+':'')+fmt(val);el.className='r-val'+(val>0?' positive':'');};
+    setLine('lineKpi',kpiBonus); setLine('lineRtu',rtuBonus); setLine('lineNs',nsBonus);
+    document.getElementById('lineKpiSub').textContent=kpiCount+'/4 выполнено';
+    document.getElementById('linePremium').textContent=fmt(premium);
+    document.getElementById('lineTotal').textContent=fmt(total);
+  }
+
+  document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',recalc));
+  document.getElementById('resetBtn').addEventListener('click',()=>{
+    Object.entries(DEFAULTS).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});
+    document.getElementById('periodSelect').value='june';
+    recalc();
+  });
+  recalc();
+</script>
+</body>
+</html>

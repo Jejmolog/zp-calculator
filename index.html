@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>первый Бит — Калькулятор зарплаты</title>
+<style>
+  :root {
+    --pink: #E50071;
+    --black: #000;
+    --gray-light: #f4f4f4;
+    --gray-mid: #e0e0e0;
+    --gray-text: #555;
+    --white: #fff;
+    --font: Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--font); background: var(--white); color: var(--black); display: flex; flex-direction: column; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--gray-mid);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+  .logo span { color: var(--pink); }
+  .header-sub { font-size: 11px; color: var(--gray-text); }
+
+  /* HERO */
+  .hero {
+    background: var(--black);
+    color: var(--white);
+    padding: 52px 40px 44px;
+    text-align: left;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pink);
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    max-width: 560px;
+  }
+  .hero-desc {
+    font-size: 13px;
+    color: #888;
+    margin-top: 12px;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: 1;
+  }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    padding: 40px;
+    border-right: 1px solid var(--gray-mid);
+    border-bottom: 1px solid var(--gray-mid);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-decoration: none;
+    color: var(--black);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .card:last-child { border-right: none; }
+  .card:hover { background: var(--gray-light); }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: var(--gray-light);
+    color: var(--gray-text);
+    border: 1px solid var(--gray-mid);
+    width: fit-content;
+  }
+  .card-badge.locked {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+  }
+
+  .card-icon {
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .card-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .card-name {
+    font-size: 13px;
+    color: var(--gray-text);
+    line-height: 1.5;
+  }
+
+  .card-meta {
+    font-size: 11px;
+    color: var(--gray-text);
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-mid);
+    line-height: 1.6;
+  }
+
+  .card-arrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--pink);
+    margin-top: 4px;
+  }
+  .card-arrow::after { content: '→'; font-size: 16px; }
+
+  .card.locked-card:hover { background: #fafafa; }
+
+  /* FOOTER */
+  footer {
+    padding: 16px 40px;
+    border-top: 1px solid var(--gray-mid);
+    font-size: 11px;
+    color: var(--gray-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  footer .footer-logo { font-weight: 700; color: var(--black); }
+  footer .footer-logo span { color: var(--pink); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">первый<span>.</span>Бит</div>
+  <div class="header-sub">Отдел автоматизации документооборота</div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Калькулятор заработной платы</div>
+  <h1>Рассчитайте свою зарплату</h1>
+  <p class="hero-desc">Введите фактические показатели за месяц — калькулятор мгновенно покажет сумму оклада и премии по вашей схеме мотивации.</p>
+</div>
+
+<div class="cards">
+
+  <a class="card" href="anna_prokhorova.html">
+    <div class="card-badge">Открытый доступ</div>
+    <div class="card-title">Менеджер активных продаж</div>
+    <div class="card-name">Прохорова Анна Михайловна</div>
+    <div class="card-meta">
+      Схема: 01.06.2026 — 01.09.2026
+    </div>
+    <div class="card-arrow">Открыть калькулятор</div>
+  </a>
+
+  <a class="card locked-card" href="vlad_matyushin.html">
+    <div class="card-badge locked">🔒 Защищён паролем</div>
+    <div class="card-title">Руководитель отдела</div>
+    <div class="card-name">Матюшин Владислав Александрович</div>
+    <div class="card-meta">
+      Схема: 01.01.2026 — 01.09.2026
+    </div>
+    <div class="card-arrow">Открыть калькулятор</div>
+  </a>
+
+</div>
+
+<footer>
+  <div class="footer-logo">первый<span>.</span>Бит · Ушаковская · Санкт-Петербург</div>
+  <div>Все суммы указаны Gross, до вычета НДФЛ</div>
+</footer>
+
+</body>
+</html>
