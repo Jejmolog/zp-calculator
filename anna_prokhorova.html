@@ -297,6 +297,39 @@
     document.getElementById('periodSelect').value='june';
     recalc();
   });
+
+  // Автозаполнение из URL-параметров
+  // Пример ссылки: anna_prokhorova.html?month=june&naryad=10&demo=5&minutes=650&meetings=8&rtu=400000&ns=250000&worked=19&scheduled=19
+  (function loadFromUrl(){
+    const p = new URLSearchParams(window.location.search);
+    const map = {
+      month:     { type:'select', id:'periodSelect' },
+      scheduled: { type:'input',  id:'scheduledDays' },
+      worked:    { type:'input',  id:'workedDays' },
+      naryad:    { type:'input',  id:'naryad' },
+      demo:      { type:'input',  id:'demo' },
+      minutes:   { type:'input',  id:'minutes' },
+      meetings:  { type:'input',  id:'meetings' },
+      rtu:       { type:'input',  id:'rtuFact' },
+      ns:        { type:'input',  id:'nsFact' }
+    };
+    let hasParams = false;
+    Object.entries(map).forEach(([param, cfg]) => {
+      if (p.has(param)) {
+        hasParams = true;
+        const el = document.getElementById(cfg.id);
+        if (el) el.value = p.get(param);
+      }
+    });
+    // Если параметры переданы — показываем баннер
+    if (hasParams) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#E50071;color:#fff;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:8px 36px;text-align:center;';
+      banner.textContent = '✓ Данные загружены автоматически из вашего отчёта';
+      document.querySelector('.period-bar').after(banner);
+    }
+  })();
+
   recalc();
 </script>
 </body>
