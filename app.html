@@ -123,8 +123,8 @@ body { font-family: var(--font); background: var(--white); color: var(--black); 
   <div class="auth-box">
     <div class="auth-logo">первый<span>.</span>Бит</div>
     <div class="auth-sub">Система расчёта заработной платы</div>
-    <label class="auth-label">Email</label>
-    <input class="auth-input" type="email" id="authEmail" placeholder="you@perviybit.ru" autocomplete="email">
+    <label class="auth-label">Логин</label>
+    <input class="auth-input" type="text" id="authEmail" placeholder="ваш логин" autocomplete="username">
     <label class="auth-label">Пароль</label>
     <input class="auth-input" type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
     <button class="auth-btn" onclick="login()">Войти</button>
@@ -312,8 +312,8 @@ async function api(method, path, body) {
 
 // ─── AUTH (простая, без Supabase Auth) ───────────────────────────────────────
 const USERS = {
-  'vlad@perviybit.ru':  { pass:'vlad2026',  name:'Влад Матюшин',   scheme:'vlad', role:'manager' },
-  'anna@perviybit.ru':  { pass:'anna2026',  name:'Анна Прохорова', scheme:'anna', role:'employee' },
+  'vamatushin':  { pass:'vlad2026',  name:'Влад Матюшин',   scheme:'vlad', role:'manager' },
+  'amprokhorova': { pass:'anna2026',  name:'Анна Прохорова', scheme:'anna', role:'employee' },
 };
 
 const ANNA_MONTHLY_PLANS = {
