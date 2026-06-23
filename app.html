@@ -312,8 +312,14 @@ async function api(method, path, body) {
 
 // ─── AUTH (простая, без Supabase Auth) ───────────────────────────────────────
 const USERS = {
-  'vamatushin':  { pass:'iPad1337',  name:'Владислав Матюшин',   scheme:'vlad', role:'manager' },
-  'amprokhorova':  { pass:'anna2026',  name:'Анна Прохорова', scheme:'anna', role:'employee' },
+  'vlad@perviybit.ru':  { pass:'vlad2026',  name:'Влад Матюшин',   scheme:'vlad', role:'manager' },
+  'anna@perviybit.ru':  { pass:'anna2026',  name:'Анна Прохорова', scheme:'anna', role:'employee' },
+};
+
+const ANNA_MONTHLY_PLANS = {
+  june:   { rtu:348450, ns:200000, kpi:{ naryad:8, demo:5, minutes:600, meetings:8 } },
+  july:   { rtu:424120, ns:200000, kpi:{ naryad:8, demo:5, minutes:600, meetings:8 } },
+  august: { rtu:485280, ns:200000, kpi:{ naryad:8, demo:5, minutes:600, meetings:8 } },
 };
 
 function login() {
@@ -354,7 +360,10 @@ function initApp() {
   }
   currentScheme = SCHEMES[currentUser.scheme];
   document.getElementById('schemeLabel').textContent = currentScheme.label;
+  // Только менеджер видит вкладку "Все сотрудники"
+  document.getElementById('managerTab').style.display = currentUser.role === 'manager' ? 'inline-block' : 'none';
   renderForm();
+  if (currentUser.scheme === 'anna') renderAnnaPlan('june');
   showTab('report');
 }
 
@@ -370,6 +379,54 @@ function showTab(name) {
   if (name==='manager') loadManager();
 }
 
+// ─── ПЛАН ДЛЯ АННЫ ───────────────────────────────────────────────────────────
+function renderAnnaPlan(month) {
+  const existing = document.getElementById('annaPlanBlock');
+  if (existing) existing.remove();
+  const plan = ANNA_MONTHLY_PLANS[month] || ANNA_MONTHLY_PLANS.june;
+  const monthLabels = { june:'Июнь', july:'Июль', august:'Август' };
+  const fmt2 = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+  const block = document.createElement('div');
+  block.id = 'annaPlanBlock';
+  block.style.cssText = 'margin-bottom:24px;border:1px solid #e0e0e0;';
+  block.innerHTML = `
+    <div style="background:#000;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">План на ${monthLabels[month] || 'месяц'}</div>
+      <div style="font-size:10px;color:#888;">Целевые показатели</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #e0e0e0;">
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">Наряды</div>
+        <div style="font-size:18px;font-weight:900;">≥ ${plan.kpi.naryad}</div>
+      </div>
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">Демо-доступы</div>
+        <div style="font-size:18px;font-weight:900;">≥ ${plan.kpi.demo}</div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">Встречи</div>
+        <div style="font-size:18px;font-weight:900;">≥ ${plan.kpi.meetings}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #e0e0e0;">
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">Минуты АТС</div>
+        <div style="font-size:18px;font-weight:900;">≥ ${plan.kpi.minutes}</div>
+      </div>
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">План РТУ</div>
+        <div style="font-size:18px;font-weight:900;">${fmt2(plan.rtu)}</div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#555;margin-bottom:4px;">Новые клиенты</div>
+        <div style="font-size:18px;font-weight:900;">${fmt2(plan.ns)}</div>
+      </div>
+    </div>
+  `;
+  const formFields = document.getElementById('formFields');
+  formFields.parentNode.insertBefore(block, formFields);
+}
+
 // ─── FORM ─────────────────────────────────────────────────────────────────────
 function renderForm() {
   const scheme = currentScheme;
@@ -379,8 +436,9 @@ function renderForm() {
     const div = document.createElement('div');
     div.className = 'form-group' + (f.type==='toggle'?' full':'');
     if (f.type === 'select') {
+      const onchange = currentUser.scheme === 'anna' ? `onchange="renderAnnaPlan(this.value)"` : '';
       div.innerHTML = `<label class="form-label">${f.label}</label>
-        <select class="form-select" id="f_${f.id}">
+        <select class="form-select" id="f_${f.id}" ${onchange}>
           ${f.options.map(o => { const [v,l]=o.split(':'); return `<option value="${v}">${l}</option>`; }).join('')}
         </select>`;
     } else if (f.type === 'toggle') {
