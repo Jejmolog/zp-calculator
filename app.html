@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>первый Бит — Расчёт ЗП</title>
+<style>
+:root {
+  --pink: #E50071; --pink-dark: #BD0069; --pink-light: #fce8f2;
+  --black: #000; --gray-light: #f4f4f4; --gray-mid: #e0e0e0;
+  --gray-text: #555; --white: #fff; --green: #00a651; --red: #e50000;
+  --font: Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--white); color: var(--black); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+/* AUTH */
+#authScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--black); padding: 20px; }
+.auth-box { width: 100%; max-width: 360px; }
+.auth-logo { font-size: 24px; font-weight: 700; color: var(--white); letter-spacing: -0.03em; margin-bottom: 8px; }
+.auth-logo span { color: var(--pink); }
+.auth-sub { font-size: 12px; color: #888; margin-bottom: 32px; letter-spacing: 0.05em; text-transform: uppercase; }
+.auth-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; display: block; }
+.auth-input { width: 100%; padding: 14px 16px; font-family: var(--font); font-size: 15px; font-weight: 700; border: 2px solid #333; background: #111; color: var(--white); outline: none; margin-bottom: 12px; }
+.auth-input:focus { border-color: var(--pink); }
+.auth-btn { width: 100%; padding: 14px; background: var(--pink); color: var(--white); border: none; font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; margin-top: 4px; }
+.auth-btn:hover { background: var(--pink-dark); }
+.auth-error { font-size: 12px; color: var(--pink); margin-top: 8px; min-height: 16px; text-align: center; }
+
+/* APP */
+#appScreen { display: none; flex-direction: column; min-height: 100vh; }
+.header { border-bottom: 1px solid var(--gray-mid); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.logo { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; }
+.logo span { color: var(--pink); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.user-name { font-size: 12px; font-weight: 700; color: var(--gray-text); }
+.logout-btn { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-text); background: none; border: 1px solid var(--gray-mid); padding: 6px 12px; cursor: pointer; }
+.logout-btn:hover { border-color: var(--black); color: var(--black); }
+
+/* TABS */
+.tabs { border-bottom: 1px solid var(--gray-mid); padding: 0 32px; display: flex; gap: 0; }
+.tab { padding: 14px 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; color: var(--gray-text); border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font); }
+.tab.active { color: var(--pink); border-bottom-color: var(--pink); }
+.tab:hover:not(.active) { color: var(--black); }
+
+/* CONTENT */
+.content { flex: 1; padding: 32px; max-width: 900px; width: 100%; margin: 0 auto; }
+
+/* NEW REPORT */
+.section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.section-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 24px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .content { padding: 20px; } }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-text); }
+.form-input { font-family: var(--font); font-size: 14px; font-weight: 700; padding: 10px 12px; border: 2px solid var(--gray-mid); outline: none; background: var(--white); }
+.form-input:focus { border-color: var(--pink); }
+.form-select { font-family: var(--font); font-size: 14px; font-weight: 700; padding: 10px 12px; border: 2px solid var(--gray-mid); outline: none; background: var(--white); cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23000'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.form-select:focus { border-color: var(--pink); }
+
+.toggle-group { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.toggle-label-text { font-size: 13px; font-weight: 700; flex: 1; }
+.toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--gray-mid); transition: 0.2s; border-radius: 24px; }
+.toggle input:checked + .toggle-slider { background: var(--pink); }
+.toggle-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; transition: 0.2s; border-radius: 50%; }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+.calc-btn { background: var(--pink); color: var(--white); border: none; font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
+.calc-btn:hover { background: var(--pink-dark); }
+.calc-btn:disabled { background: var(--gray-mid); cursor: default; }
+
+/* RESULT */
+.result-block { margin-top: 24px; border: 2px solid var(--black); }
+.result-header { background: var(--black); color: var(--white); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+.result-header-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #888; }
+.result-total { font-size: 28px; font-weight: 900; letter-spacing: -0.02em; }
+.result-body { padding: 0 20px; }
+.result-line { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--gray-mid); gap: 8px; }
+.result-line:last-child { border-bottom: none; }
+.result-line-label { font-size: 13px; font-weight: 700; }
+.result-line-sub { font-size: 11px; color: var(--gray-text); }
+.result-line-val { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.result-line-val.pos { color: var(--pink); }
+.save-btn { width: 100%; margin-top: 16px; padding: 14px; background: var(--black); color: var(--white); border: none; font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.save-btn:hover { background: #222; }
+.save-msg { text-align: center; font-size: 12px; font-weight: 700; padding: 10px; margin-top: 8px; }
+.save-msg.ok { color: var(--green); }
+.save-msg.err { color: var(--red); }
+
+/* HISTORY */
+.history-empty { text-align: center; padding: 60px 20px; color: var(--gray-text); }
+.history-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.history-empty-title { font-size: 14px; font-weight: 700; color: var(--black); margin-bottom: 6px; }
+
+.report-card { border: 1px solid var(--gray-mid); margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s; }
+.report-card:hover { border-color: var(--black); }
+.report-card-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.report-card-month { font-size: 13px; font-weight: 700; }
+.report-card-date { font-size: 11px; color: var(--gray-text); }
+.report-card-total { font-size: 18px; font-weight: 900; color: var(--pink); }
+.report-card-body { padding: 0 20px 16px; display: none; border-top: 1px solid var(--gray-mid); }
+.report-card-body.open { display: block; }
+.report-detail-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-mid); font-size: 12px; }
+.report-detail-line:last-child { border-bottom: none; }
+
+/* MANAGER */
+.employee-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.emp-tab { font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; padding: 8px 16px; border: 2px solid var(--gray-mid); background: var(--white); cursor: pointer; color: var(--gray-text); }
+.emp-tab.active { border-color: var(--black); color: var(--black); background: var(--gray-light); }
+
+.loading { text-align: center; padding: 40px; color: var(--gray-text); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">первый<span>.</span>Бит</div>
+    <div class="auth-sub">Система расчёта заработной платы</div>
+    <label class="auth-label">Email</label>
+    <input class="auth-input" type="email" id="authEmail" placeholder="you@perviybit.ru" autocomplete="email">
+    <label class="auth-label">Пароль</label>
+    <input class="auth-input" type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+    <button class="auth-btn" onclick="login()">Войти</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <header class="header">
+    <div class="logo">первый<span>.</span>Бит</div>
+    <div class="header-right">
+      <div class="user-name" id="userName"></div>
+      <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabsBar">
+    <button class="tab active" onclick="showTab('report')">Новый расчёт</button>
+    <button class="tab" onclick="showTab('history')">История</button>
+    <button class="tab" id="managerTab" style="display:none" onclick="showTab('manager')">Все сотрудники</button>
+  </div>
+
+  <!-- NEW REPORT -->
+  <div class="content" id="tabReport">
+    <div class="section-title">Расчёт зарплаты</div>
+    <div class="section-sub" id="schemeLabel"></div>
+
+    <div class="form-grid" id="formFields"></div>
+
+    <button class="calc-btn" onclick="calculate()">Рассчитать ЗП</button>
+
+    <div class="result-block" id="resultBlock" style="display:none">
+      <div class="result-header">
+        <div>
+          <div class="result-header-label">Итого к начислению (Gross)</div>
+          <div class="result-total" id="resTotal"></div>
+        </div>
+      </div>
+      <div class="result-body" id="resBody"></div>
+      <div style="padding:16px 20px 20px">
+        <button class="save-btn" onclick="saveReport()">Сохранить в историю</button>
+        <div class="save-msg" id="saveMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="content" id="tabHistory" style="display:none">
+    <div class="section-title">История расчётов</div>
+    <div class="section-sub">Все сохранённые расчёты зарплаты</div>
+    <div id="historyList"><div class="loading">Загрузка...</div></div>
+  </div>
+
+  <!-- MANAGER -->
+  <div class="content" id="tabManager" style="display:none">
+    <div class="section-title">Все сотрудники</div>
+    <div class="section-sub">Расчёты по каждому сотруднику</div>
+    <div class="employee-tabs" id="empTabs"></div>
+    <div id="managerList"><div class="loading">Загрузка...</div></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://sswkqqbzjlxkdnrnosgl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_591h6ASkoIXkHpKJ9JdAiw_ul0CCVbA';
+
+// ─── FORMULAS ─────────────────────────────────────────────────────────────────
+const SCHEMES = {
+  anna: {
+    label: 'Менеджер активных продаж · Прохорова Анна Михайловна',
+    oklad: 70000,
+    kpiAmt: 5000,
+    nsPlan: 200000,
+    plans: {
+      june:   { label:'Июнь 2026',   rtu:348450 },
+      july:   { label:'Июль 2026',   rtu:424120 },
+      august: { label:'Август 2026', rtu:485280 }
+    },
+    fields: [
+      { id:'month',     label:'Месяц',                    type:'select', options:['june:Июнь 2026','july:Июль 2026','august:Август 2026'] },
+      { id:'scheduled', label:'Дней по графику',          type:'number', default:21 },
+      { id:'worked',    label:'Отработано дней',          type:'number', default:21 },
+      { id:'naryad',    label:'Наряды на услуги (цель ≥8)', type:'number', default:0 },
+      { id:'demo',      label:'Демо-доступы (цель ≥5)',   type:'number', default:0 },
+      { id:'minutes',   label:'Минуты по АТС (цель ≥600)', type:'number', default:0 },
+      { id:'meetings',  label:'Встречи (цель ≥8)',        type:'number', default:0 },
+      { id:'rtu',       label:'Сумма реализации РТУ (без НДС)', type:'number', default:0 },
+      { id:'ns',        label:'Продажи новым клиентам (без НДС)', type:'number', default:0 },
+    ],
+    calc(f) {
+      const plan = this.plans[f.month] || this.plans.june;
+      const oklad = this.oklad * (f.worked / f.scheduled);
+      const kpi = [f.naryad>=8, f.demo>=5, f.minutes>=600, f.meetings>=8];
+      const kpiCount = kpi.filter(Boolean).length;
+      const kpiBonus = kpiCount * this.kpiAmt;
+      const rtuBonus = Math.max(0, f.rtu - plan.rtu) * 0.01;
+      const nsBonus  = Math.max(0, f.ns - this.nsPlan) * 0.03;
+      const premium  = kpiBonus + rtuBonus + nsBonus;
+      const total    = oklad + premium;
+      return {
+        oklad, kpiCount, kpiBonus, rtuBonus, nsBonus, premium, total,
+        periodLabel: plan.label,
+        rtuPlan: plan.rtu,
+        lines: [
+          { label:'Оклад', sub:`${f.worked}/${f.scheduled} дн.`, val:oklad },
+          { label:'KPI', sub:`${kpiCount}/4 выполнено`, val:kpiBonus, pos:true },
+          { label:'РТУ (1% от превышения)', sub:`план ${fmt(plan.rtu)}, факт ${fmt(f.rtu)}`, val:rtuBonus, pos:true },
+          { label:'Новые сервисы (3%)', sub:`план ${fmt(this.nsPlan)}, факт ${fmt(f.ns)}`, val:nsBonus, pos:true },
+          { label:'Премия итого', sub:'', val:premium },
+        ]
+      };
+    }
+  },
+  vlad: {
+    label: 'Руководитель отдела · Матюшин Владислав Александрович',
+    oklad: 150000,
+    kpiAmt: 5000,
+    etalons: { jan:330090,feb:161205,mar:305595,apr:492090,may:196440,jun:348450,jul:414120,aug:485280 },
+    fields: [
+      { id:'month',    label:'Месяц', type:'select', options:['jun:Июнь 2026','jul:Июль 2026','aug:Август 2026'] },
+      { id:'scheduled',label:'Дней по графику', type:'number', default:21 },
+      { id:'worked',   label:'Отработано дней', type:'number', default:21 },
+      { id:'preleads', label:'Прелиды с мероприятий (цель ≥150)', type:'number', default:0 },
+      { id:'meetings', label:'Предпродажные встречи (цель ≥5)', type:'number', default:0 },
+      { id:'kpi3',     label:'Менеджеры выполнили план по РТУ/ДС', type:'toggle' },
+      { id:'kpi4',     label:'Отдел выполнил план по новым сделкам', type:'toggle' },
+      { id:'rtu',      label:'Сумма РТУ отдела (без НДС)', type:'number', default:0 },
+      { id:'kab',      label:'Сумма по кабинету сотрудника (без НДС)', type:'number', default:0 },
+    ],
+    calc(f) {
+      const monthKey = f.month || 'jun';
+      const etalon = this.etalons[monthKey] || 348450;
+      const periodLabels = {jun:'Июнь 2026',jul:'Июль 2026',aug:'Август 2026'};
+      const oklad = this.oklad * (f.worked / f.scheduled);
+      const kpi = [f.preleads>=150, f.meetings>=5, !!f.kpi3, !!f.kpi4];
+      const kpiCount = kpi.filter(Boolean).length;
+      const kpiBonus = kpiCount * this.kpiAmt;
+      const rtuBonus = f.rtu * 0.03;
+      let kabBonus = 0;
+      if (f.kab >= etalon && etalon > 0) { const ratio = f.kab/etalon; kabBonus = f.kab*0.01*ratio; }
+      const premium = kpiBonus + rtuBonus + kabBonus;
+      const total   = oklad + premium;
+      return {
+        oklad, kpiCount, kpiBonus, rtuBonus, kabBonus, premium, total,
+        periodLabel: periodLabels[monthKey] || 'Июнь 2026',
+        lines: [
+          { label:'Оклад', sub:`${f.worked}/${f.scheduled} дн.`, val:oklad },
+          { label:'KPI', sub:`${kpiCount}/4 выполнено`, val:kpiBonus, pos:true },
+          { label:'РТУ (3%)', sub:`факт ${fmt(f.rtu)}`, val:rtuBonus, pos:true },
+          { label:'Кабинет сотрудника', sub:`эталон ${fmt(etalon)}, факт ${fmt(f.kab)}`, val:kabBonus, pos:true },
+          { label:'Премия итого', sub:'', val:premium },
+        ]
+      };
+    }
+  }
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let currentEmployee = null;
+let currentScheme = null;
+let lastResult = null;
+let lastFields = null;
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const fmtDate = s => new Date(s).toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
+
+async function api(method, path, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.status === 204 ? null : res.json();
+}
+
+// ─── AUTH (простая, без Supabase Auth) ───────────────────────────────────────
+const USERS = {
+  'vlad@perviybit.ru':  { pass:'vlad2026',  name:'Влад Матюшин',   scheme:'vlad', role:'manager' },
+  'anna@perviybit.ru':  { pass:'anna2026',  name:'Анна Прохорова', scheme:'anna', role:'employee' },
+};
+
+function login() {
+  const email = document.getElementById('authEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('authPassword').value;
+  const user  = USERS[email];
+  if (!user || user.pass !== pass) {
+    document.getElementById('authError').textContent = 'Неверный email или пароль';
+    return;
+  }
+  currentUser = { email, ...user };
+  localStorage.setItem('zp_user', email);
+  initApp();
+}
+
+function logout() {
+  localStorage.removeItem('zp_user');
+  currentUser = null;
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+}
+
+function tryAutoLogin() {
+  const saved = localStorage.getItem('zp_user');
+  if (saved && USERS[saved]) {
+    currentUser = { email: saved, ...USERS[saved] };
+    initApp();
+  }
+}
+
+// ─── APP INIT ─────────────────────────────────────────────────────────────────
+function initApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  document.getElementById('userName').textContent = currentUser.name;
+  if (currentUser.role === 'manager') {
+    document.getElementById('managerTab').style.display = 'inline-block';
+  }
+  currentScheme = SCHEMES[currentUser.scheme];
+  document.getElementById('schemeLabel').textContent = currentScheme.label;
+  renderForm();
+  showTab('report');
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['report','history','manager'].forEach(t => {
+    document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i) => {
+    el.classList.toggle('active', ['report','history','manager'][i]===name);
+  });
+  if (name==='history') loadHistory();
+  if (name==='manager') loadManager();
+}
+
+// ─── FORM ─────────────────────────────────────────────────────────────────────
+function renderForm() {
+  const scheme = currentScheme;
+  const container = document.getElementById('formFields');
+  container.innerHTML = '';
+  scheme.fields.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'form-group' + (f.type==='toggle'?' full':'');
+    if (f.type === 'select') {
+      div.innerHTML = `<label class="form-label">${f.label}</label>
+        <select class="form-select" id="f_${f.id}">
+          ${f.options.map(o => { const [v,l]=o.split(':'); return `<option value="${v}">${l}</option>`; }).join('')}
+        </select>`;
+    } else if (f.type === 'toggle') {
+      div.innerHTML = `<div class="toggle-group">
+        <span class="toggle-label-text">${f.label}</span>
+        <label class="toggle"><input type="checkbox" id="f_${f.id}"><span class="toggle-slider"></span></label>
+      </div>`;
+    } else {
+      div.innerHTML = `<label class="form-label">${f.label}</label>
+        <input class="form-input" type="number" id="f_${f.id}" value="${f.default||0}" min="0">`;
+    }
+    container.appendChild(div);
+  });
+}
+
+function getFields() {
+  const scheme = currentScheme;
+  const f = {};
+  scheme.fields.forEach(field => {
+    const el = document.getElementById(`f_${field.id}`);
+    if (!el) return;
+    if (field.type === 'toggle') f[field.id] = el.checked;
+    else if (field.type === 'select') f[field.id] = el.value;
+    else f[field.id] = parseFloat(el.value) || 0;
+  });
+  return f;
+}
+
+// ─── CALCULATE ────────────────────────────────────────────────────────────────
+function calculate() {
+  const fields = getFields();
+  lastFields = fields;
+  const result = currentScheme.calc(fields);
+  lastResult = result;
+
+  document.getElementById('resTotal').textContent = fmt(result.total);
+  const body = document.getElementById('resBody');
+  body.innerHTML = result.lines.map(l => `
+    <div class="result-line">
+      <div><div class="result-line-label">${l.label}</div>${l.sub?`<div class="result-line-sub">${l.sub}</div>`:''}</div>
+      <div class="result-line-val ${l.pos&&l.val>0?'pos':''}">${l.val>0&&l.pos?'+':''}${fmt(l.val)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultBlock').style.display = 'block';
+  document.getElementById('saveMsg').textContent = '';
+}
+
+// ─── SAVE ─────────────────────────────────────────────────────────────────────
+async function saveReport() {
+  if (!lastResult) return;
+  const msg = document.getElementById('saveMsg');
+  msg.textContent = 'Сохраняю...';
+  msg.className = 'save-msg';
+  try {
+    const employees = await api('GET', `employees?username=eq.${currentUser.email.split('@')[0]}&select=id`);
+    // Найдём сотрудника по email
+    const emps = await api('GET', `employees?email=eq.${currentUser.email}&select=id`);
+    const empId = emps[0]?.id;
+    await api('POST', 'reports', {
+      employee_id: empId,
+      month: lastResult.periodLabel,
+      scheduled_days: lastFields.scheduled || lastFields.scheduledDays,
+      worked_days: lastFields.worked || lastFields.workedDays,
+      data: lastFields,
+      salary_total: Math.round(lastResult.total),
+      salary_oklad: Math.round(lastResult.oklad),
+      salary_premium: Math.round(lastResult.premium),
+    });
+    msg.textContent = '✓ Сохранено успешно!';
+    msg.className = 'save-msg ok';
+  } catch(e) {
+    msg.textContent = 'Ошибка при сохранении';
+    msg.className = 'save-msg err';
+  }
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="loading">Загрузка...</div>';
+  try {
+    const emps = await api('GET', `employees?email=eq.${currentUser.email}&select=id`);
+    const empId = emps[0]?.id;
+    if (!empId) { list.innerHTML = '<div class="loading">Сотрудник не найден в базе</div>'; return; }
+    const reports = await api('GET', `reports?employee_id=eq.${empId}&order=created_at.desc&select=*`);
+    if (!reports.length) {
+      list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div><div class="history-empty-title">Нет сохранённых расчётов</div><div>Рассчитайте зарплату и сохраните результат</div></div>`;
+      return;
+    }
+    list.innerHTML = reports.map((r,i) => `
+      <div class="report-card" onclick="toggleCard(${i})">
+        <div class="report-card-header">
+          <div>
+            <div class="report-card-month">${r.month}</div>
+            <div class="report-card-date">${fmtDate(r.created_at)}</div>
+          </div>
+          <div class="report-card-total">${fmt(r.salary_total)}</div>
+        </div>
+        <div class="report-card-body" id="card${i}">
+          <div class="report-detail-line"><span>Оклад</span><span>${fmt(r.salary_oklad)}</span></div>
+          <div class="report-detail-line"><span>Премия</span><span>${fmt(r.salary_premium)}</span></div>
+          <div class="report-detail-line"><span>Отработано дней</span><span>${r.worked_days} из ${r.scheduled_days}</span></div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="loading">Ошибка загрузки</div>';
+  }
+}
+
+function toggleCard(i) {
+  const el = document.getElementById(`card${i}`);
+  el.classList.toggle('open');
+}
+
+// ─── MANAGER ─────────────────────────────────────────────────────────────────
+let allEmployees = [];
+let activeEmp = null;
+
+async function loadManager() {
+  if (currentUser.role !== 'manager') return;
+  const tabs = document.getElementById('empTabs');
+  const list = document.getElementById('managerList');
+  try {
+    allEmployees = await api('GET', 'employees?select=*');
+    tabs.innerHTML = allEmployees.map(e =>
+      `<button class="emp-tab ${!activeEmp||activeEmp===e.id?'':''}\" onclick="selectEmployee('${e.id}')">${e.name}</button>`
+    ).join('');
+    if (!activeEmp && allEmployees.length) selectEmployee(allEmployees[0].id);
+  } catch(e) {
+    list.innerHTML = '<div class="loading">Ошибка загрузки</div>';
+  }
+}
+
+async function selectEmployee(id) {
+  activeEmp = id;
+  document.querySelectorAll('.emp-tab').forEach((el,i) => {
+    el.classList.toggle('active', allEmployees[i]?.id === id);
+  });
+  const list = document.getElementById('managerList');
+  list.innerHTML = '<div class="loading">Загрузка...</div>';
+  try {
+    const reports = await api('GET', `reports?employee_id=eq.${id}&order=created_at.desc&select=*`);
+    if (!reports.length) {
+      list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div><div class="history-empty-title">Нет расчётов</div></div>`;
+      return;
+    }
+    list.innerHTML = reports.map((r,i) => `
+      <div class="report-card" onclick="toggleMCard(${i})">
+        <div class="report-card-header">
+          <div>
+            <div class="report-card-month">${r.month}</div>
+            <div class="report-card-date">${fmtDate(r.created_at)}</div>
+          </div>
+          <div class="report-card-total">${fmt(r.salary_total)}</div>
+        </div>
+        <div class="report-card-body" id="mcard${i}">
+          <div class="report-detail-line"><span>Оклад</span><span>${fmt(r.salary_oklad)}</span></div>
+          <div class="report-detail-line"><span>Премия</span><span>${fmt(r.salary_premium)}</span></div>
+          <div class="report-detail-line"><span>Отработано дней</span><span>${r.worked_days} из ${r.scheduled_days}</span></div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="loading">Ошибка загрузки</div>';
+  }
+}
+
+function toggleMCard(i) {
+  document.getElementById(`mcard${i}`).classList.toggle('open');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+tryAutoLogin();
+</script>
+</body>
+</html>
