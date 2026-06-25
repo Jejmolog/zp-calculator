@@ -467,6 +467,7 @@ async function loadHistory() {
     const empId = emps[0]?.id;
     if (!empId) { list.innerHTML = '<div class="loading">Сотрудник не найден в базе</div>'; return; }
     const reports = await api('GET', `reports?employee_id=eq.${empId}&order=created_at.desc&select=*`);
+    reports.forEach(r => { if (r.data && typeof r.data === 'string') { try { r.data = JSON.parse(r.data); } catch(e) {} } });
     if (!reports.length) {
       list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div><div class="history-empty-title">Нет сохранённых расчётов</div><div>Рассчитайте зарплату и сохраните результат</div></div>`;
       return;
@@ -529,6 +530,7 @@ async function selectEmployee(id) {
   list.innerHTML = '<div class="loading">Загрузка...</div>';
   try {
     const reports = await api('GET', `reports?employee_id=eq.${id}&order=created_at.desc&select=*`);
+    reports.forEach(r => { if (r.data && typeof r.data === 'string') { try { r.data = JSON.parse(r.data); } catch(e) {} } });
     if (!reports.length) {
       list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div><div class="history-empty-title">Нет расчётов</div></div>`;
       return;
