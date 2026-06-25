@@ -482,8 +482,12 @@ async function loadHistory() {
         </div>
         <div class="report-card-body" id="card${i}">
           <div class="report-detail-line"><span>Оклад</span><span>${fmt(r.salary_oklad)}</span></div>
-          <div class="report-detail-line"><span>Премия</span><span>${fmt(r.salary_premium)}</span></div>
           <div class="report-detail-line"><span>Отработано дней</span><span>${r.worked_days} из ${r.scheduled_days}</span></div>
+          ${r.data && r.data.kpi_bonus !== undefined ? `<div class="report-detail-line"><span>KPI</span><span>+${fmt(r.data.kpi_bonus)}</span></div>` : ""}
+          ${r.data && r.data.rtu_bonus !== undefined ? `<div class="report-detail-line"><span>РТУ</span><span>+${fmt(r.data.rtu_bonus)}</span></div>` : ""}
+          ${r.data && r.data.kab_bonus !== undefined ? `<div class="report-detail-line"><span>Кабинет</span><span>+${fmt(r.data.kab_bonus)}</span></div>` : ""}
+          ${r.data && r.data.ns_bonus !== undefined ? `<div class="report-detail-line"><span>Новые сервисы</span><span>+${fmt(r.data.ns_bonus)}</span></div>` : ""}
+          <div class="report-detail-line"><span><b>Премия итого</b></span><span><b>${fmt(r.salary_premium)}</b></span></div>
         </div>
       </div>
     `).join('');
@@ -540,8 +544,12 @@ async function selectEmployee(id) {
         </div>
         <div class="report-card-body" id="mcard${i}">
           <div class="report-detail-line"><span>Оклад</span><span>${fmt(r.salary_oklad)}</span></div>
-          <div class="report-detail-line"><span>Премия</span><span>${fmt(r.salary_premium)}</span></div>
           <div class="report-detail-line"><span>Отработано дней</span><span>${r.worked_days} из ${r.scheduled_days}</span></div>
+          ${r.data && r.data.kpi_bonus !== undefined ? `<div class="report-detail-line"><span>KPI</span><span>+${fmt(r.data.kpi_bonus)}</span></div>` : ""}
+          ${r.data && r.data.rtu_bonus !== undefined ? `<div class="report-detail-line"><span>РТУ</span><span>+${fmt(r.data.rtu_bonus)}</span></div>` : ""}
+          ${r.data && r.data.kab_bonus !== undefined ? `<div class="report-detail-line"><span>Кабинет</span><span>+${fmt(r.data.kab_bonus)}</span></div>` : ""}
+          ${r.data && r.data.ns_bonus !== undefined ? `<div class="report-detail-line"><span>Новые сервисы</span><span>+${fmt(r.data.ns_bonus)}</span></div>` : ""}
+          <div class="report-detail-line"><span><b>Премия итого</b></span><span><b>${fmt(r.salary_premium)}</b></span></div>
         </div>
       </div>
     `).join('');
